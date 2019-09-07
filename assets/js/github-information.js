@@ -46,7 +46,7 @@ function fetchGitHubInformation(e) {
     
     let username = $("#gh-username").val();
     if( ! username) {
-        $("#gh-user-data").html(`<h2>Please enter a GitHub username`);
+        $("#gh-user-data").html(`<p>Please enter a GitHub username</p>`);
         return;
     }
     
@@ -66,14 +66,18 @@ function fetchGitHubInformation(e) {
             $("#gh-user-data").html(userInformationHTML(userData));
             $("#gh-repo-data").html(repoInformationHTML(repoData));
         }, function(errorResponse) {
-            if(errorResponse.statu === 404) {
-                $("gh-user-data").html(
+            if(errorResponse.status === 404) {
+                $("#gh-user-data").html(
                     `<h2>No info found for user ${username}</h2>`);
-             } else {
-                 console.log(errorResponse);
-                 $("gh-user-data").html(
+            } else if(errorResponse.status === 403) {
+                console.log("403 error");
+                let resetTime = new Date(errorResponse.getResponseHeader('X-RateLimit-Reset') * 1000); 
+                $("#gh-user-data").html(`<h4>Too many requests, please wait ${resetTime.toLocaleTimeString()}</h4>`);
+            } else {
+                console.log(errorResponse);
+                $("#gh-user-data").html(
                     `<h2>Error: ${errorResponse.responseJSON.message}</h2>`);
-             }
+            }
         }
     );
 }
